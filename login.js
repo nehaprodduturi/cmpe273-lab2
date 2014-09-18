@@ -5,7 +5,7 @@
 function Login() {
 	// sessionId -> user map
 	this.sessionMap = {
-		99999 : { name: 'Foo', email: 'foo@bar.com' }
+		99999 : { name: "Neha", email: "neha@gmail.com" }
 	};
 }
 /**
@@ -15,6 +15,14 @@ Login.prototype.hello = function(sessionId) {
 	return 'Hello ' + this.sessionMap[sessionId].name + '\n';
 };
 
+Login.prototype.refresh = function(sessionId) {
+	var uname = this.sessionMap[sessionId].name;
+	var uemail = this.sessionMap[sessionId].email;
+	var sessionId = new Date().getTime();
+	this.sessionMap[sessionId] = { name: uname, email: uemail}
+
+	return sessionId;
+}
 /**
  * Check whether the given session id is valid (is in sessionMap) or not.
  */
@@ -42,6 +50,7 @@ Login.prototype.login = function(_name, _email) {
  */ 
 Login.prototype.logout = function(sessionId) {
 	console.log('logout::' + sessionId);
+	delete this.sessionMap[sessionId];
    /*
 	* TODO: Remove the given sessionId from the sessionMap
 	*/

@@ -25,6 +25,7 @@ function get(request, response) {
 	if ('session_id' in cookies) {
 		var sid = cookies['session_id'];
 		if ( login.isLoggedIn(sid) ) {
+			response.setHeader('Content-type','text/html');
 			response.setHeader('Set-Cookie', 'session_id=' + sid);
 			response.end(login.hello(sid));	
 		} else {
@@ -40,23 +41,48 @@ function post(request, response) {
 	// var newSessionId = login.login('xxx', 'xxx@gmail.com');
 	// TODO: set new session id to the 'session_id' cookie in the response
 	// replace "Logged In" response with response.end(login.hello(newSessionId));
-
-	response.end("Logged In\n");
+	var newSessionId = login.login(request.body.name,request.body.email);
+	response.setHeader('Content-type','text/html');
+	response.setHeader('Set-Cookie', 'session_id=' + newSessionId);
+	response.end(login.hello(newSessionId));
+	// response.end("Logged In\n");
 };
 
 function del(request, response) {
-	console.log("DELETE:: Logout from the server");
- 	// TODO: remove session id via login.logout(xxx)
- 	// No need to set session id in the response cookies since you just logged out!
-
-  	response.end('Logged out from the server\n');
+	var cookies = request.cookies;
+	console.log(cookies);
+	if ('session_id' in cookies) {
+		var sid = cookies['session_id'];
+		if ( login.isLoggedIn(sid) ) {
+			login.logout(sid);
+			console.log("DELETE:: Logout from the server"+sid);
+ 			// TODO: remove session id via login.logout(xxx)
+ 			// No need to set session id in the response cookies since you just logged out!
+ 			response.setHeader('Content-type','text/html');
+  			response.end('Logged out from the server\n');
+  		} else {
+			response.end("Invalid session_id! Please login again\n");
+		}
+	}
 };
 
 function put(request, response) {
-	console.log("PUT:: Re-generate new seesion_id for the same user");
-	// TODO: refresh session id; similar to the post() function
-
-	response.end("Re-freshed session id\n");
+	var cookies = request.cookies;
+	console.log(cookies);
+	if ('session_id' in cookies) {
+		var sid = cookies['session_id'];
+		if ( login.isLoggedIn(sid) ) {
+			console.log("PUT:: Re-generate new seesion_id for the same user");
+			var newSessionId = login.refresh(sid);
+			response.setHeader('Content-type','text/html');
+			response.setHeader('Set-Cookie', 'session_id=' + newSessionId);
+			response.end((login.hello(newSessionId))+'Re-freshed session id\n');
+			// TODO: refresh session id; similar to the post() function
+		} else {
+			response.end("Invalid session_id! Please login again\n");
+		}
+	}
+	// response.end("Re-freshed session id\n");
 };
 
 app.listen(8000);
